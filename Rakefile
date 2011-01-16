@@ -10,8 +10,6 @@ rescue LoadError => e
   require "rake/rdoctask"
 end
 
-require 'config/jeweler' # setup gem configuration
-
 task :default  => [:test, :cleanup_test]
 desc "Update vendor directory and run tests"
 

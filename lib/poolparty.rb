@@ -1,14 +1,12 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
-t=Time.now
-
 # Load system gems
-%w(rubygems logger erb open-uri).each do |lib|
-  require lib
-end
+require 'logger'
+require 'erb'
+require 'open-uri'
 
 # Add all vendor gems to the load paths
-Dir[File.dirname(__FILE__)+"/../vendor/gems/*"].each {|lib| $LOAD_PATH.unshift(File.expand_path("#{lib}/lib")) }
+Dir[File.dirname(__FILE__)+"/../vendor/gems/*"].each do |lib|
+  $:.unshift( File.expand_path("#{lib}/lib") )
+end
 
 # Load local gems
 %w(dslify json searchable_paths).each do |dep|
@@ -16,44 +14,29 @@ Dir[File.dirname(__FILE__)+"/../vendor/gems/*"].each {|lib| $LOAD_PATH.unshift(F
 end
 
 module PoolParty
+  autoload :Base, "poolparty/base"
+  autoload :Chef, "poolparty/chef"
+  autoload :ChefAttribute, "poolparty/chef_attribute"
+  autoload :ChefClient, "poolparty/chef_client"
+  autoload :ChefSolo, "poolparty/chef_solo"
+  autoload :Cloud, "poolparty/cloud"
+  autoload :Pool, "poolparty/pool"
+  autoload :PoolPartyError, "poolparty/pool_party_error"
+  autoload :VERSION, "poolparty/version"
+
   def self.version
-    return @version if @version
-    config = YAML.load(File.read(File.expand_path("#{File.dirname(__FILE__)}/../VERSION.yml")))
-    @version = "#{config[:major]}.#{config[:minor]}.#{config[:patch]}"
-    @version += "-" + config[:build] if  config[:build]
+    VERSION
   end
+
   def self.lib_dir
-  File.join(File.dirname(__FILE__), "..")
+    File.join(File.dirname(__FILE__), "..")
   end
 end
 
-# Require the poolparty error so we can use it ubiquitously
-require "poolparty/pool_party_error"
-
 # Core object overloads
-%w( object
-    string
-    array
-    hash
-    symbol
-  ).each do |lib|
+%w( object string array hash symbol ).each do |lib|
   require "core/#{lib}"
 end
 
-require "keypair"
-
-# PoolParty core
-$LOAD_PATH.unshift(File.dirname(__FILE__)/"poolparty")
-%w( base 
-    chef_attribute
-    chef
-    chef_solo
-    chef_client
-    cloud pool
-  ).each do |lib|
-  require "poolparty/#{lib}"
-end
-
+require 'keypair'
 require 'cloud_providers'
-
-puts "PoolParty core loadtime: #{Time.now-t}"

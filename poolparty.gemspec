@@ -3,7 +3,7 @@ require "poolparty/version"
 
 Gem::Specification.new do |s|
   s.name             = "poolparty"
-  s.version          = "1.6.9"
+  s.version          = PoolParty::VERSION
   s.platform         = Gem::Platform::RUBY
 
   s.homepage         = "http://poolpartyrb.com"

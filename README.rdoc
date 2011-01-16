@@ -6,11 +6,11 @@ http://poolpartyrb.com
 
 PoolParty makes cloud provisioning and management easy. PoolParty provides a unified interface for defining and managing cloud infrasturcure on different cloud providers (just Ec2 for now).
 
-Code your cloud! 
+Code your cloud!
 
 == SYNOPSIS:
 
-PoolParty is written with the intention of being as application-agnostic as possible. It installs only the basic 
+PoolParty is written with the intention of being as application-agnostic as possible. It installs only the basic
 required software to glue the cloud together on the instances as listed below.
 
 == Quickstart
@@ -21,7 +21,7 @@ For instance, to start a basic cloud, let's write one:
     cloud "app" do
       instances 2..10
       using :ec2
-      autoscale do      
+      autoscale do
         trigger :lower_threshold => 0.3, :upper_threshold => 1.0, :measure => :cpu
       end
       security_group do
@@ -32,11 +32,11 @@ For instance, to start a basic cloud, let's write one:
       end
     end
   end
-  
+
 Simply by issuing the command:
-  
+
   cloud start
-  
+
 This will create an ec2 auto scaling group that will launch the minimum_instances (2 in this case,) inside a security group. The default naming of most objects, such as security_groups, auto scaling groups, launch_configurations, load_balancers and keypairs follow the poolname-cloudname convention.
 There are a number of commands PoolParty offers to interact with your cloud. They include:
 

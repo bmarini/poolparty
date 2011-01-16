@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    poolparty (1.6.9)
+      amazon-ec2 (= 0.9.9)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    amazon-ec2 (0.9.9)
+      xml-simple (>= 1.0.12)
+    xml-simple (1.0.12)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  amazon-ec2 (= 0.9.9)
+  poolparty!

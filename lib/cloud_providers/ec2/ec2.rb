@@ -2,14 +2,8 @@
   EC2 CloudProvider
   This serves as the basis for running PoolParty on Amazon's ec2 cloud.
 =end
-begin
-  require 'AWS'
-rescue LoadError
-  puts <<-EOM
-  There was an error requiring AWS
-EOM
-end
 
+require 'AWS'
 require 'pp'
 
 module CloudProviders

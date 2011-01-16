@@ -15,9 +15,11 @@ Gem::Specification.new do |s|
     and maintaining tool that makes cloud computing easier.
   EOM
 
+  s.add_dependency "amazon-ec2", "0.9.9"
+
   s.files            = %w(Rakefile README.rdoc License.txt VERSION.yml) + Dir["{config,examples,lib,test,tasks,script,generators,bin,vendor}/**/*"]
   s.test_files       = Dir["test/**/test_*.rb"]
-  s.executables      = Dir["bin/*"]
+  s.executables      = Dir["bin/*"].map { |f| File.basename(f) }
   s.require_paths    = ["lib"]
 
   s.rdoc_options     = ["--quiet", "--title", "PoolParty documentation", "--line-numbers", "--main", "README.rdoc"]

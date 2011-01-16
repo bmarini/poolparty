@@ -13,17 +13,6 @@ end
 task :default  => [:test, :cleanup_test]
 desc "Update vendor directory and run tests"
 
-namespace :poolparty do
-    namespace :vendor do
-        desc "Fetch all the submodules"
-        task :submodules do
-            `git submodule update`
-        end
-    end
-end
-
-task :vendor => ["poolparty:vendor:submodules"]
- 
 task :cleanup_test do
   ::FileUtils.rm_rf "/tmp/poolparty"
 end
@@ -33,11 +22,12 @@ end
 # end
  
 Rake::TestTask.new(:test) do |t|
+  t.libs << "test"
   t.test_files = FileList['test/lib/**/*_test.rb']
   t.warning = false
-  t.verbose = false
+  t.verbose = true
 end
- 
+
 begin
   require 'rcov/rcovtask'
  

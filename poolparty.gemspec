@@ -15,7 +15,10 @@ Gem::Specification.new do |s|
     and maintaining tool that makes cloud computing easier.
   EOM
 
-  s.add_dependency "amazon-ec2", "0.9.9"
+  s.add_dependency "amazon-ec2", "~> 0.9.9"
+  s.add_development_dependency "shoulda", "~> 2.11.2"
+  s.add_development_dependency "mocha", "~> 0.9.10"
+  s.add_development_dependency "fakeweb", "~> 1.3.0"
 
   s.files            = %w(Rakefile README.rdoc License.txt VERSION.yml) + Dir["{config,examples,lib,test,tasks,script,generators,bin,vendor}/**/*"]
   s.test_files       = Dir["test/**/test_*.rb"]

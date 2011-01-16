@@ -39,12 +39,12 @@ def capture_stdout(&block)
 end
 
 def stub_keypair_searchable_paths
-  Keypair.searchable_paths << fixtures_dir/"keys"  
+  Keypair.searchable_paths << fixtures_dir/"keys"
 end
 
 def stub_ec2_calls(&block)
   stub_keypair_searchable_paths
-  
+
   require 'fakeweb'
   FakeWeb.allow_net_connect=false
 

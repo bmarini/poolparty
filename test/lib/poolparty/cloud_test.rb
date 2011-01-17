@@ -44,7 +44,7 @@ class CloudTest < Test::Unit::TestCase
   def test_nodes
     assert_respond_to @cloud, :nodes
     assert_respond_to @cloud.nodes, :each
-    assert @cloud.nodes.size>1
+    assert_equal 0, @cloud.nodes.size
   end
       
   def test_run

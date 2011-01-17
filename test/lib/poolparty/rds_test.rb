@@ -9,10 +9,17 @@ class RdsTest < Test::Unit::TestCase
     reset!
   end
 
-  def test_basic
-    scenario "rds_cloud"
-  end
+  # def test_stubs
+  #   assert_equal "", AWS::RDS::Base.new(
+  #     :access_key_id => ENV['EC2_ACCESS_KEY'],
+  #     :secret_access_key => ENV['EC2_SECRET_KEY']
+  #   ).describe_db_instances
+  # end
 
+  def test_basic
+    # scenario "rds_cloud"
+  end
+  
   def test_required_properties
     assert_raises(RuntimeError) { scenario "rds_missing_params" }
   end

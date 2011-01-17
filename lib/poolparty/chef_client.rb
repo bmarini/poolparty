@@ -3,7 +3,7 @@ require 'uri' # for URI.parse in write_bootstrap_files
 module PoolParty
   # Chef class bootstrapping chef-client.
   class ChefClient < Chef
-    dsl_methods :server_url,:validation_token, :validation_key, :validation_client_name
+    dsl_methods :server_url, :validation_token, :validation_key, :validation_client_name
 
     # When init_style.nil?, old behavior is used (just run the client).
     # If init_style is specified, bootstrap::client cookbook is executed

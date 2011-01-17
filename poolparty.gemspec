@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "shoulda", "~> 2.11.2"
   s.add_development_dependency "mocha", "~> 0.9.10"
   s.add_development_dependency "fakeweb", "~> 1.3.0"
+  s.add_development_dependency "rcov", "~> 0.9.9"
 
   s.files            = %w(Rakefile README.rdoc License.txt VERSION.yml) + Dir["{config,examples,lib,test,tasks,script,generators,bin,vendor}/**/*"]
   s.test_files       = Dir["test/**/test_*.rb"]

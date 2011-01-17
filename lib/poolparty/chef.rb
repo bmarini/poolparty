@@ -12,19 +12,18 @@ module PoolParty
     BOOTSTRAP_BINS = %w( gem chef-solo chef-client )
     BOOTSTRAP_DIRS = %w( /var/log/chef /var/cache/chef /var/run/chef )
 
+    def self.types
+      [ :solo, :client ]
+    end
+
+    def self.get_chef(type, cloud, &block)
+      PoolParty.const_get("Chef" + type.to_s.capitalize).new(type, :cloud => cloud, &block)
+    end
+
     def compile!
       build_tmp_dir
     end
 
-    def self.types
-      return [:solo,:client]
-    end
-    
-    def self.get_chef(type,cloud,&block)
-      ("Chef" + type.to_s.capitalize).constantize(PoolParty).send(:new,type,:cloud => cloud,&block)
-    end
-    # Chef    
-    
     def attributes(hsh={}, &block)
       @attributes ||= ChefAttribute.new(hsh, &block)
     end
@@ -32,7 +31,6 @@ module PoolParty
     def override_attributes(hsh={}, &block)
       @override_attributes ||= ChefAttribute.new(hsh, &block)
     end
-
 
     # === Description
     #
@@ -71,8 +69,10 @@ module PoolParty
       else
         depends = nil
       end
+
       change_attr :@_current_action, action do
         yield
+
         if depends
           # Merge the recipes of the dependency into
           # the current recipes

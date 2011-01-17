@@ -1,0 +1,5 @@
+* Replace amazon-ec2 with fog
+* Refactor DSL implementation to not rely on dslify, separate evaluation of dsl
+  from execution of dsl
+* Remove unnecessary core extensions, especially on Object
+* Use fog's mocks as replacement for fakeweb stuffs

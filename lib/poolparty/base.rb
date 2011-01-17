@@ -6,26 +6,30 @@ module PoolParty
   class Base
     include Dslify
     attr_reader :name
-    def initialize(name, o={}, &block)
+
+    def initialize(name, opts={}, &block)
       @name = name
-      @init_opts = o
-      set_vars_from_options(o)
-      instance_eval &block if block
+      @init_opts = opts
+      set_vars_from_options(opts)
+      instance_eval(&block) if block_given?
       after_initialized
     end
+
     def after_initialized
     end
+
     def run
-      warn "#{self.class} does not implement run. Something is wrong"
+      raise NotImplementedError, "Please implement the run method"
     end
-    def method_missing(m,*a,&block)
-      if parent.respond_to?(m)
-        parent.send(m,*a,&block)
+
+    def method_missing(name, *args, &block)
+      if parent.respond_to?(name)
+        parent.send(name, *args, &block)
       else
         super
       end
     end
-    
+
     private
   end
 

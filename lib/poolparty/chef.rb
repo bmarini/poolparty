@@ -61,7 +61,7 @@ module PoolParty
     #
     # to do everything
     #
-    def on_step action, &block
+    def on_step(action, &block)
       if action.is_a? Hash
         t = action
         action = t.keys[0]
@@ -71,8 +71,6 @@ module PoolParty
       end
 
       change_attr :@_current_action, action do
-        yield
-
         if depends
           # Merge the recipes of the dependency into
           # the current recipes
@@ -80,6 +78,9 @@ module PoolParty
             recipe r
           end
         end
+
+        instance_eval(&block)
+
       end
     end
     

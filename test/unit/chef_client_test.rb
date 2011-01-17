@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ChefTest < Test::Unit::TestCase
+class ChefClientTest < Test::Unit::TestCase
 
   # chef :client do
   #   server_url "http://chef-server.domain.tld:4000"

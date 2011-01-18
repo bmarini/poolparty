@@ -10,7 +10,12 @@ module PoolParty
       # conflict with advance usage of security groups
       c.security_group "#poolparty-#{c.proper_name}"
     end
-    
+
+    def add_cloud(c)
+      clouds[c.name.to_s] = c
+      c.security_group "#poolparty-#{c.proper_name}"
+    end
+
     def clouds
       @clouds ||= {}
     end
@@ -24,15 +29,6 @@ module PoolParty
       end
       threads.each{ |aThread| aThread.join }
       results
-    end
-        
-    at_exit do
-      if pool.auto_execute
-        puts <<-EOE
-----> Running #{pool.name} #{pool.auto_execute}
-        EOE
-        pool.run
-      end
     end
     
     # === Description

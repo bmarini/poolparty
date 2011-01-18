@@ -1,13 +1,5 @@
 class Object
-    
-  def pool(name=nil, &block)
-    @@pool ||= PoolParty::Pool.new(name, &block)
-  end
-  
-  def reset!
-    @@pool = nil
-  end
-  
+
   def print_msg(msg_arr)
     msg_arr.each do |line|
       puts line

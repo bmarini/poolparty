@@ -54,15 +54,13 @@ You did not specify a cloud provider in your clouds.rb. Make sure you have a blo
         raise PoolParty::PoolPartyError.create("DslMethodCall", "You must call instances with either a number, a range or a hash (for a list of nodes)")
       end
     end
-    
 
     # Upload the source to dest ( using rsync )
     def upload source, dest
       @uploads ||= []
       @uploads << { :source => source, :dest => dest }
-    end    
+    end
 
-    
     # The pool can either be the parent (the context where the object is declared)
     # or the global pool object
     def pool
@@ -97,6 +95,11 @@ You did not specify a cloud provider in your clouds.rb. Make sure you have a blo
       raise ArgumentError, "Chef type must be one of #{Chef.types.map{|v| ":" + v.to_s}.join(",")}." unless Chef.types.include?(chef_type)
       @chef||=Chef.get_chef(chef_type,self,&block)
     end
+
+    def chef=(chef)
+      @chef = chef
+    end
+
     # compile the cloud spec and execute the compiled system and remote calls
     def run
       puts "  running on #{cloud_provider.class}"

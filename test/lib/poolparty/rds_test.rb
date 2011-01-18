@@ -6,7 +6,6 @@ class RdsTest < Test::Unit::TestCase
     stub_response(AWS::EC2::Base, :describe_security_groups, 'ec2-describe-security-groups')
     stub_response(AWS::EC2::Base, :run_instances,            'ec2-run-instances')
     stub_response(AWS::RDS::Base, :describe_db_instances,    'rds-describe-db-instances-empty')
-    reset!
   end
 
   # def test_stubs
@@ -19,7 +18,7 @@ class RdsTest < Test::Unit::TestCase
   def test_basic
     # scenario "rds_cloud"
   end
-  
+
   def test_required_properties
     assert_raises(RuntimeError) { scenario "rds_missing_params" }
   end
@@ -27,12 +26,9 @@ class RdsTest < Test::Unit::TestCase
   private
 
   def scenario(filename)
-    clear!
-
-    @filepath = fixtures_dir/"clouds/#{filename}.rb"
-    require @filepath
-    @cloud = pool.clouds[pool.clouds.keys.first]
-
+    filepath = "#{fixtures_dir}/clouds/#{filename}.rb"
+    pools    = PoolParty::Dsl.load(filepath)
+    @cloud   = pools.first.clouds.values.first
     @cloud.run
   end
 

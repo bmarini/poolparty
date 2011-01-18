@@ -20,6 +20,7 @@ module PoolParty
   autoload :ChefClient, "poolparty/chef_client"
   autoload :ChefSolo, "poolparty/chef_solo"
   autoload :Cloud, "poolparty/cloud"
+  autoload :Dsl, "poolparty/dsl"
   autoload :Pool, "poolparty/pool"
   autoload :PoolPartyError, "poolparty/pool_party_error"
   autoload :VERSION, "poolparty/version"

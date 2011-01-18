@@ -3,10 +3,6 @@ require "test_helper"
 class ChefDnaTest < Test::Unit::TestCase
 
   context "Chef DNA" do
-    setup do
-      reset!
-    end
-
     should "create dna for chef client" do
       client = PoolParty::Chef.get_chef(:client, nil) { |c| c.server_url = "http://localhost:4000" }
 
@@ -42,7 +38,7 @@ class ChefDnaTest < Test::Unit::TestCase
   }
 }
         EOF
-        assert_equal expected, result
+        assert_equal JSON.parse(expected, :create_additions => false), JSON.parse(result, :create_additions => false)
       ensure
         dnafile.close
         dnafile.unlink

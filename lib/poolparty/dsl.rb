@@ -1,67 +1,28 @@
 module PoolParty
   module Dsl
-    class Main
-      def self.evaluate(spec)
-        builder = new
-        builder.instance_eval(spec)
-        builder.to_definition
-      end
+    autoload :Main, "poolparty/dsl/main"
+    autoload :PoolBlock, "poolparty/dsl/pool_block"
+    autoload :CloudBlock, "poolparty/dsl/cloud_block"
+    autoload :ChefBlock, "poolparty/dsl/chef_block"
 
-      def initialize
-        @pools = []
-      end
-
-      def pool(name=:default, &block)
-        @pools << PoolBlock.evaluate(name, &block)
-      end
-
-      def to_definition
-        @pools
-      end
+    def self.load(file)
+      evaluate( File.read(file) )
     end
 
-    class PoolBlock
-      def self.evaluate(name, &block)
-        builder = new(name)
-        builder.instance_eval(&block)
-        builder.to_definition
-      end
-
-      def initialize(name)
-        @pool = Pool.new(name)
-      end
-
-      def cloud(name, &block)
-        @pool.add_cloud CloudBlock.evaluate(name, @pool, &block)
-      end
-
-      def to_definition
-        @pool
-      end
+    def self.evaluate(spec)
+      Main.evaluate(spec)
     end
 
-
-    class CloudBlock
-      def self.evaluate(name, pool, &block)
-        builder = new(name, pool)
-        builder.instance_eval(&block)
-        builder.to_definition
-      end
-
-      def initialize(name, pool)
-        @cloud = Cloud.new(name, :parent => pool)
-      end
-
-      def keypair(path)
-        @cloud.keypair(path)
-      end
-
-      def instances(arg)
-        @cloud.instances(path)
-      end
-
-      def to_definition
-        @cloud
+    module Properties
+      def attribute(*names)
+        names.each do |name|
+          class_eval %Q{
+            def #{name}(val=nil)
+              @#{name} = val unless val.nil?
+              @#{name}
+            end
+          }
+        end
       end
     end
   end

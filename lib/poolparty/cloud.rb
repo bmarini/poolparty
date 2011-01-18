@@ -1,121 +1,98 @@
-module PoolParty  
-  class Cloud < Base
-    default_options(
-      :description            => "PoolParty cloud",
-      :minimum_instances      => 1,
-      :maximum_instances      => 3
-    )
-    
-    # returns an instance of Keypair
+module PoolParty
+  # A lot of functionality is delegated to the provider
+
+  class Cloud
+    attr_accessor :name, :description, :minimum_instances, :maximum_instances, :provider, :pool
+    attr_writer :chef
+
+    def initialize(name, pool)
+      @name              = name
+      @pool              = pool
+      @description       = "PoolParty cloud"
+      @minimum_instances = 1
+      @maximum_instances = 3
+    end
+
+    def parent
+      @pool
+    end
+
+    def provider
+      raise ArgumentError, "You must specify a cloud provider for this cloud" if @provider.nil?
+      @provider
+    end
+    alias_method :cloud_provider, :provider
+
+    def provider=(provider)
+      @provider = provider.is_a?(Symbol) ? provider_for(provider) : provider
+    end
+
+    def provider_for(key)
+      CloudProviders.const_get(key.to_s.capitalize).new(key, :cloud => self)
+    end
+
     # You can pass either a filename which will be searched for in ~/.ec2/ and ~/.ssh/
     # Or you can pass a full filepath
-    def keypair(n=nil, extra_paths=[])
-      return @keypair if @keypair
-      @keypair = case n
-      when String
-        Keypair.new(n, extra_paths)
-      when nil
-        fpath = CloudProviders::CloudProvider.default_keypair_path/"#{proper_name}"
-        File.exists?(fpath) ? Keypair.new(fpath, extra_paths) : generate_keypair(extra_paths)
-      else
-        raise ArgumentError, "There was an error when defining the keypair"
+    def keypair=(path, extra_paths=[])
+      @keypair = Keypair.new(path, extra_paths)
+    end
+
+    def keypair
+      @keypair ||= default_keypair
+    end
+
+    def default_keypair
+      fpath = File.join( CloudProviders::CloudProvider.default_keypair_path, "#{proper_name}" )
+      File.exists?(fpath) ? Keypair.new(fpath) : generate_keypair
+    end
+
+    def set_default_security_group
+      if provider.security_groups.empty?
+        security_group( proper_name, :authorize => { :from_port => 22, :to_port => 22 } )
       end
     end
-    
-    private
-    def generate_keypair(extra_paths=[])
-      puts "Generate the keypair for this cloud because its not found: #{proper_name}"
-      cloud_provider.send :generate_keypair, proper_name
-      Keypair.new(proper_name, extra_paths)
-    end
-    
-    def after_initialized
-      raise PoolParty::PoolPartyError.create("NoCloudProvider", <<-EOE
-You did not specify a cloud provider in your clouds.rb. Make sure you have a block that looks like:
 
-  using :ec2
-      EOE
-      ) unless cloud_provider
-      security_group(proper_name, :authorize => {:from_port => 22, :to_port => 22}) if security_groups.empty?
-    end
-    
-    public
-    def instances(arg)
+    def instances=(arg)
       case arg
       when Range
-        minimum_instances arg.first
-        maximum_instances arg.last
+        minimum_instances = arg.first
+        maximum_instances = arg.last
       when Fixnum
-        minimum_instances arg
-        maximum_instances arg
+        minimum_instances = arg
+        maximum_instances = arg
       when Hash
         nodes(arg)
       else
-        raise PoolParty::PoolPartyError.create("DslMethodCall", "You must call instances with either a number, a range or a hash (for a list of nodes)")
+        raise ArgumentError, "You must call instances with either a number, a range or a hash (for a list of nodes)"
       end
     end
 
     # Upload the source to dest ( using rsync )
-    def upload source, dest
+    def add_upload(source, dest)
       @uploads ||= []
       @uploads << { :source => source, :dest => dest }
     end
 
-    # The pool can either be the parent (the context where the object is declared)
-    # or the global pool object
-    def pool
-      parent || pool
-    end
-    
     def tmp_path
-      "/tmp/poolparty" / pool.name / name
-    end
-    
-    public
-    
-    attr_reader :cloud_provider
-    def using(provider_name, &block)
-      return @cloud_provider if @cloud_provider
-      @cloud_provider = "#{provider_name}".constantize(CloudProviders).send(:new, provider_name, :cloud => self, &block)
-      # Decorate the cloud with the cloud_provider methods
-      (class << self; self; end).instance_variable_set('@cloud_provider', @cloud_provider)
-        (class << self; self; end).class_eval do
-          @cloud_provider.public_methods(false).each do |meth|
-            next if respond_to?(meth) || method_defined?(meth) || private_method_defined?(meth)
-            eval <<-EOE
-              def #{meth}(*args, &block)
-                @cloud_provider.send(:#{meth}, *args, &block)
-              end
-            EOE
-        end
-      end
-    end
-
-    def chef(chef_type=:solo, &block)
-      raise ArgumentError, "Chef type must be one of #{Chef.types.map{|v| ":" + v.to_s}.join(",")}." unless Chef.types.include?(chef_type)
-      @chef||=Chef.get_chef(chef_type,self,&block)
-    end
-
-    def chef=(chef)
-      @chef = chef
+      "/tmp/poolparty/#{pool.name}/#{name}"
     end
 
     # compile the cloud spec and execute the compiled system and remote calls
     def run
-      puts "  running on #{cloud_provider.class}"
-      cloud_provider.run
+      puts "  running on #{provider.class}"
+      provider.run
+
       unless @chef.nil?
         compile!
         bootstrap!
       end
     end
-        
-    
+
     # TODO: Incomplete and needs testing
     # Shutdown and delete the load_balancers, auto_scaling_groups, launch_configurations,
     # security_groups, triggers and instances defined by this cloud
     def teardown
-      raise "Only Ec2 teardown supported" unless cloud_provider.name.to_s == 'ec2'
+      raise "Only Ec2 teardown supported" unless provider.name.to_s == 'ec2'
       puts "! Tearing down cloud #{name}"
       # load_balancers.each do |name, lb|
       #   puts "! Deleting load_balaner #{lb_name}"
@@ -149,7 +126,7 @@ You did not specify a cloud provider in your clouds.rb. Make sure you have a blo
       # end
       #TODO: keypair.delete # Do we want to delete the keypair?  probably, but not certain
     end
-    
+
     def reboot!
       orig_nodes = nodes
       if autoscalers.empty?
@@ -186,7 +163,7 @@ No autoscalers defined
       run
       puts ""
     end
-    
+
     def compile!
       unless @uploads.nil?
         puts "Uploading files via rsync"
@@ -196,35 +173,35 @@ No autoscalers defined
       end
       @chef.compile! unless @chef.nil?
     end
-    
+
     def bootstrap!
       cloud_provider.bootstrap_nodes!(tmp_path)
     end
-    
+
     def configure!
       compile!
       cloud_provider.configure_nodes!(tmp_path)
     end
-    
+
     def reset!
       cloud_provider.reset!
     end
-    
+
     def ssh(num=0)
       nodes[num].ssh
     end
-    
+
     def rsync(source, dest)
       nodes.each do |node|
         node.rsync(:source => source, :destination => dest)
       end
     end
-    
+
     # TODO: list of nodes needs to be consistentley sorted
     def nodes
       cloud_provider.nodes.select {|a| a.in_service? }
     end
-        
+
     # Run command/s on all nodes in the cloud.
     # Returns a hash of instance_id=>result pairs
     def cmd(commands, opts={})
@@ -237,15 +214,36 @@ No autoscalers defined
       threads.each{ |aThread| aThread.join }
       results
     end
-    
+
     # Explicit proxies to cloud_provider methods
     def run_instance(o={}); cloud_provider.run_instance(o);end
     def terminate_instance!(o={}); cloud_provider.terminate_instance!(o);end
     def describe_instances(o={}); cloud_provider.describe_instances(o);end
     def describe_instance(o={}); cloud_provider.describe_instance(o);end
-    
+
     def proper_name
       "#{parent.name}-#{name}"
     end
+
+    def method_missing(name, *args, &block)
+      if @provider && @provider.respond_to?(name)
+        @provider.send(name, *args, &block)
+      else
+        super
+      end
+    end
+
+    def respond_to?(name, include_private = false)
+      @provider && @provider.respond_to?(name) || super
+    end
+
+    private
+
+    def generate_keypair(extra_paths=[])
+      puts "Generating the keypair for this cloud because its not found: #{proper_name}"
+      cloud_provider.send :generate_keypair, proper_name
+      Keypair.new(proper_name, extra_paths)
+    end
+
   end
 end

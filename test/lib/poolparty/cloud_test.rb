@@ -5,7 +5,7 @@ class CloudTest < Test::Unit::TestCase
   def setup
     cloudfile = "#{fixtures_dir}/clouds/simple_cloud.rb"
     @pools    = PoolParty::Dsl.load(cloudfile)
-    @cloud    = @pools.first.clouds.values.first
+    @cloud    = @pools.first.clouds.first
   end
 
   def test_have_a_pool_name
@@ -28,11 +28,9 @@ class CloudTest < Test::Unit::TestCase
   end
 
   def test_set_the_cloud_provider_with_a_using_block
-    @cloud.instance_eval do
-      using :ec2
-      keypair "test_key", fixtures_dir/"keys"
-      image_id 'emi-39921602'
-    end
+    @cloud.provider = :ec2
+    @cloud.keypair  = "test_key", "#{fixtures_dir}/keys"
+    @cloud.image_id 'emi-39921602'
 
     assert_equal :ec2, @cloud.cloud_provider.name
     assert_equal CloudProviders::Ec2, @cloud.cloud_provider.class
@@ -70,6 +68,7 @@ class CloudTest < Test::Unit::TestCase
     pools = PoolParty::Dsl.evaluate <<-EOF
       pool "ssh_port" do
         cloud "babity" do
+          using :ec2
           keypair "test_key"
           ssh_port 1922
         end
@@ -84,10 +83,12 @@ class CloudTest < Test::Unit::TestCase
     pools = PoolParty::Dsl.evaluate <<-EOF
       pool "ssher" do
         cloud "custom" do
+          using :ec2
           keypair "test_key"
           # ssh_options("-P" => "1992")
         end
         cloud "noneity" do
+          using :ec2
           keypair "test_key"
         end
       end

@@ -8,23 +8,23 @@ module PoolParty
       end
 
       def initialize(name, pool)
-        @cloud = Cloud.new(name, :parent => pool, :using => :ec2)
+        @cloud = Cloud.new(name, pool)
       end
 
       def keypair(path)
-        @cloud.keypair(path)
+        @cloud.keypair = path
       end
 
       def instances(arg)
-        @cloud.instances(arg)
+        @cloud.instances = arg
       end
 
       def upload(src, dst)
-        @cloud.upload(src, dst)
+        @cloud.add_upload(src, dst)
       end
 
       def using(provider, &block)
-        @cloud.using(provider, &block)
+        @cloud.provider = CloudProviders.const_get(provider.to_s.capitalize).new(provider, :cloud => @cloud, &block)
       end
 
       def chef(type, &block)
@@ -32,6 +32,7 @@ module PoolParty
       end
 
       def to_definition
+        @cloud.set_default_security_group
         @cloud
       end
 

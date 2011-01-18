@@ -4,7 +4,7 @@ class ChefDnaTest < Test::Unit::TestCase
 
   context "Chef DNA" do
     should "create dna for chef client" do
-      client = PoolParty::Chef.get_chef(:client, nil) { |c| c.server_url = "http://localhost:4000" }
+      client = PoolParty::ChefClient.new(:project) { server_url "http://localhost:4000" }
 
       client.roles "base", "app"
       client.recipe "nginx::source"
@@ -48,7 +48,7 @@ class ChefDnaTest < Test::Unit::TestCase
 
     should "create dna and role for chef solo" do
       pool   = PoolParty::Pool.new("test")
-      cloud  = PoolParty::Cloud.new("chefcloud", :parent => pool) { |c| c.using :ec2 }
+      cloud  = PoolParty::Cloud.new("chefcloud", pool)
       client = PoolParty::Chef.get_chef(:solo, cloud)
 
       client.repo "/etc/chef/repo"

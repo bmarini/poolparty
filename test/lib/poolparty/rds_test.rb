@@ -28,7 +28,7 @@ class RdsTest < Test::Unit::TestCase
   def scenario(filename)
     filepath = "#{fixtures_dir}/clouds/#{filename}.rb"
     pools    = PoolParty::Dsl.load(filepath)
-    @cloud   = pools.first.clouds.values.first
+    @cloud   = pools.first.clouds.first
     @cloud.run
   end
 

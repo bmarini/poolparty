@@ -6,6 +6,7 @@ class DslTest < Test::Unit::TestCase
       pools = PoolParty::Dsl.evaluate <<-EOF
 pool "test" do
   cloud "project_a" do
+    using :ec2
     keypair "/etc/chef/project_a.pem"
     instances 1..2
   end
@@ -14,7 +15,7 @@ end
 
       assert_equal 1, pools.size
       assert_equal "test", pools.first.name
-      assert_equal "/etc/chef/project_a.pem", pools.first.clouds["project_a"].keypair.filepath
+      assert_equal "/etc/chef/project_a.pem", pools.first.clouds.first.keypair.filepath
 
     end
 
@@ -22,6 +23,7 @@ end
       pools = PoolParty::Dsl.evaluate <<-EOF
 pool "test" do
   cloud "project_a" do
+    using :ec2
     keypair "/etc/chef/project_a.pem"
     instances 1..2
 

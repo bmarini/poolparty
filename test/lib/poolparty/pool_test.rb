@@ -22,7 +22,7 @@ class PoolTest < Test::Unit::TestCase
         end
       EOF
 
-      assert_instance_of PoolParty::Cloud, pools.first.clouds["project1"]
+      assert_instance_of PoolParty::Cloud, pools.first.clouds.first
     end
 
   end

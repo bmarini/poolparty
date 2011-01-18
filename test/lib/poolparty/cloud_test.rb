@@ -6,8 +6,9 @@ class CloudTest < Test::Unit::TestCase
   # include RR::Adapters::TestUnit
   def setup
     clear!
+    reset!
     @filepath = fixtures_dir/"clouds/simple_cloud.rb"
-    require @filepath
+    load @filepath
     @cloud = pool.clouds[pool.clouds.keys.first]
   end
     

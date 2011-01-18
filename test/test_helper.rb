@@ -3,7 +3,7 @@ require "bundler/setup"
 require "test/unit"
 require "shoulda"
 require "mocha"
-
+require "tempfile"
 require "test_methods"
 
 modify_env_with_hash(

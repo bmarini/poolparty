@@ -1,3 +1,4 @@
+* Remove global @@pool variable from Object!
 * Replace amazon-ec2 with fog
 * Refactor DSL implementation to not rely on dslify, separate evaluation of dsl
   from execution of dsl

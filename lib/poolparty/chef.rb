@@ -1,5 +1,6 @@
 module PoolParty
   class Chef < Base
+    attr_reader :attributes, :override_attributes
 
     BOOTSTRAP_PACKAGES = %w( ruby ruby1.8-dev libopenssl-ruby1.8 rdoc
       ri irb build-essential wget ssl-cert rubygems git-core rake
@@ -24,12 +25,20 @@ module PoolParty
       build_tmp_dir
     end
 
-    def attributes(hsh={}, &block)
-      @attributes ||= ChefAttribute.new(hsh, &block)
+    def attributes
+      @attributes ||= ChefAttribute.new
+    end
+    
+    def override_attributes
+      @override_attributes ||= ChefAttribute.new
     end
 
-    def override_attributes(hsh={}, &block)
-      @override_attributes ||= ChefAttribute.new(hsh, &block)
+    def attributes=(atts)
+      @attributes = ChefAttribute[atts]
+    end
+    
+    def override_attributes=(atts)
+      @override_attributes = ChefAttribute[atts]
     end
 
     # === Description

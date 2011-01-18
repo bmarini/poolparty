@@ -75,15 +75,17 @@ log_level         :info
         }
       }
 
-      override_attributes.merge! pp
-      ca = ChefAttribute.new({
+      override_attributes.merge!(pp)
+
+      ca = ChefAttribute[{
         :name => cloud.name,
         :json_class => "Chef::Role",
         :chef_type => "role",
-        :default_attributes => attributes.init_opts,
-        :override_attributes => override_attributes.init_opts,
+        :default_attributes => attributes,
+        :override_attributes => override_attributes,
         :description => description
-      })
+      }]
+
       ca.to_dna _recipes(pool.chef_step).map {|a| File.basename(a) }, to
     end
   end

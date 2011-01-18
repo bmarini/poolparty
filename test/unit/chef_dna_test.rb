@@ -9,7 +9,7 @@ class ChefDnaTest < Test::Unit::TestCase
       client.roles "base", "app"
       client.recipe "nginx::source"
       client.recipe "varnish"
-      client.attributes :nginx => { :listen_ports => ["80", "8080"] }
+      client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
 
       dnafile = nil
 
@@ -17,7 +17,7 @@ class ChefDnaTest < Test::Unit::TestCase
         dnafile = Tempfile.new("dna.json")
 
         client.attributes.to_dna(
-          [], dnafile.path, { :run_list => client.roles.map { |r| "role[#{r}]"} + client._recipes.map { |r| "recipe[#{r}]" } }.merge(client.attributes.init_opts)
+          [], dnafile.path, { :run_list => client.roles.map { |r| "role[#{r}]"} + client._recipes.map { |r| "recipe[#{r}]" } }.merge(client.attributes)
         )
 
         dnafile.rewind
@@ -54,7 +54,7 @@ class ChefDnaTest < Test::Unit::TestCase
       client.repo "/etc/chef/repo"
       client.recipe "nginx::source"
       client.recipe "varnish"
-      client.attributes :nginx => { :listen_ports => ["80", "8080"] }
+      client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
 
       dnafile = nil
 

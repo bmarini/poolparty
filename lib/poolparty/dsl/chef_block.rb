@@ -17,12 +17,12 @@ module PoolParty
         @chef.recipes(*recipe_names)
       end
 
-      def attributes(atts={})
-        @chef.attributes(atts)
+      def attributes(atts)
+        @chef.attributes = atts
       end
 
-      def override_attributes(atts={})
-        @chef.override_attributes(atts)
+      def override_attributes(atts)
+        @chef.override_attributes = atts
       end
 
       def on_step(action, &block)

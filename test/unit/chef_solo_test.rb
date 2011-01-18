@@ -32,13 +32,13 @@ class ChefSoloTest < Test::Unit::TestCase
       expected_atts = { "apache2" => { :config => "foo" } }
 
       assert_equal ["apache2"], @chef._recipes
-      assert_equal expected_atts, @chef.override_attributes.init_opts
+      assert_equal expected_atts, @chef.override_attributes
     end
 
     should "support attributes" do
       expected_atts = { :apache2 => { :listen_ports => ["80", "8080"] } }
-      @chef.attributes expected_atts
-      assert_equal expected_atts, @chef.attributes.init_opts
+      @chef.attributes = expected_atts
+      assert_equal expected_atts, @chef.attributes
     end
   end
 end

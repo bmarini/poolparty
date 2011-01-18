@@ -18,6 +18,7 @@ module PoolParty
   autoload :Chef, "poolparty/chef"
   autoload :ChefAttribute, "poolparty/chef_attribute"
   autoload :ChefClient, "poolparty/chef_client"
+  autoload :ChefDnaFile, "poolparty/chef_dna_file"
   autoload :ChefSolo, "poolparty/chef_solo"
   autoload :Cloud, "poolparty/cloud"
   autoload :Dsl, "poolparty/dsl"

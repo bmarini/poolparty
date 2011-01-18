@@ -1,6 +1,6 @@
 module PoolParty
-  class Chef < Base
-    attr_reader :attributes, :override_attributes
+  class Chef
+    attr_reader :cloud, :attributes, :override_attributes
 
     BOOTSTRAP_PACKAGES = %w( ruby ruby1.8-dev libopenssl-ruby1.8 rdoc
       ri irb build-essential wget ssl-cert rubygems git-core rake
@@ -12,18 +12,6 @@ module PoolParty
     # packages and gems above, but we check for them
     BOOTSTRAP_BINS = %w( gem chef-solo chef-client )
     BOOTSTRAP_DIRS = %w( /var/log/chef /var/cache/chef /var/run/chef )
-
-    def self.types
-      [ :solo, :client ]
-    end
-
-    def self.get_chef(type, cloud, &block)
-      PoolParty.const_get("Chef" + type.to_s.capitalize).new(type, :cloud => cloud, &block)
-    end
-
-    def compile!
-      build_tmp_dir
-    end
 
     def attributes
       @attributes ||= ChefAttribute.new
@@ -41,86 +29,23 @@ module PoolParty
       @override_attributes = ChefAttribute[atts]
     end
 
-    # === Description
-    #
-    # Provides the ability to specify steps that can be
-    # run via chef
-    #
-    # pool "mycluster" do
-    #   cloud "mycloud" do
-    #       
-    #       on_step :download_install do
-    #           recipe "myrecipes::download"
-    #           recipe "myrecipes::install"
-    #       end
-    #
-    #       on_step :run => :download_install do
-    #           recipe "myrecipes::run"
-    #       end
-    #   end
-    # end
-    #
-    # Then from the command line you can do
-    #
-    # cloud-configure --step=download_install 
-    #
-    # to only do the partial job or
-    #
-    # cloud-configure --step=run
-    #
-    # to do everything
-    #
-    def on_step(action, &block)
-      if action.is_a? Hash
-        t = action
-        action = t.keys[0]
-        depends = t.values[0]
-      else
-        depends = nil
-      end
+    def add_recipe(recipe_name, action=:default, recipe_atts={})
+      _recipes(action) << recipe_name unless _recipes(action).include?(recipe_name)
 
-      change_attr :@_current_action, action do
-        if depends
-          # Merge the recipes of the dependency into
-          # the current recipes
-          _recipes(depends).each do |r|
-            recipe r
-          end
-        end
-
-        instance_eval(&block)
-
+      unless recipe_atts.empty?
+        key = recipe_name.split("::").first
+        override_attributes.merge!(key => recipe_atts)
       end
     end
-    
-    # Adds a chef recipe to the cloud
-    #
-    # The hsh parameter is inserted into the override_attributes.
-    # The insertion is performed as follows. If
-    # the recipe name = "foo::bar" then effectively the call is
-    #
-    # override_attributes.merge! { :foo => { :bar => hsh } }
-    def recipe(recipe_name, hsh={})
-      _recipes << recipe_name unless _recipes.include?(recipe_name)
 
-      head = {}
-      tail = head
-      recipe_name.split("::").each do |key|
-        unless key == "default"
-          n = {}
-          tail[key] = n
-          tail = n
-        end
-      end
-      tail.replace hsh
-
-      override_attributes.merge!(head) unless hsh.empty?
-    end
-    
     def recipes(*recipes)
       recipes.each do |r|
-        recipe(r)
+        add_recipe(r)
       end
+    end
+
+    def compile!
+      build_tmp_dir
     end
 
     def node_run!(remote_instance)
@@ -187,20 +112,21 @@ module PoolParty
       remote_instance.ssh(bootstrap_cmds)
       end
 
-    
-    def _recipes action = nil
+    def _recipes(action=nil)
+      @recipes ||= Hash.new { |h,k| h[k] = [] }
+
       action = action.to_sym unless action.nil?
-      @_recipes ||= {:default => [] }
-      key = action || _current_action
-      @_recipes[key] ||= []
+      key = action || current_action
+
+      @recipes[key]
     end
 
     private
 
-    def _current_action
-      @_current_action ||= :default
+    def current_action
+      @current_action ||= :default
     end
-    
+
     def chef_cmd
 
       if ENV["CHEF_DEBUG"]
@@ -213,14 +139,6 @@ module PoolParty
         PATH="$PATH:$GEM_BIN" #{chef_bin} -j /etc/chef/dna.json -c /etc/chef/client.rb -d -i 1800 -s 20 #{debug}
       CMD
     end
-    
-    def method_missing(m,*args,&block)
-      if cloud.respond_to?(m)
-        cloud.send(m,*args,&block)
-      else
-        super
-      end
-    end
-    
+
   end
 end

@@ -2,8 +2,7 @@ module PoolParty
   # A lot of functionality is delegated to the provider
 
   class Cloud
-    attr_accessor :name, :description, :minimum_instances, :maximum_instances, :provider, :pool
-    attr_writer :chef
+    attr_accessor :name, :description, :minimum_instances, :maximum_instances, :provider, :pool, :chef
 
     def initialize(name, pool)
       @name              = name

@@ -2,7 +2,11 @@ require "fileutils"
 
 module PoolParty
   class ChefSolo < Chef
-    dsl_methods :repo 
+    attr_accessor :repo
+
+    def initialize(cloud)
+      @cloud = cloud
+    end
 
     private
     def chef_bin
@@ -69,9 +73,9 @@ log_level         :info
       # the role for easy access in recipes.
       pp = {
         :poolparty => {
-            :parent_name => cloud.parent.name,
+            :parent_name => cloud.pool.name,
             :name => cloud.name,
-            :pool_info => pool.to_hash
+            :pool_info => cloud.pool.to_hash
         }
       }
 
@@ -83,10 +87,10 @@ log_level         :info
         :chef_type => "role",
         :default_attributes => attributes,
         :override_attributes => override_attributes,
-        :description => description
+        :description => cloud.description
       }]
 
-      ca.to_dna _recipes(pool.chef_step).map {|a| File.basename(a) }, to
+      ca.to_dna _recipes(cloud.pool.chef_step).map {|a| File.basename(a) }, to
     end
   end
 end

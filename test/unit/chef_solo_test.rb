@@ -12,26 +12,32 @@ class ChefSoloTest < Test::Unit::TestCase
 
   context "Chef Solo DSL" do
     setup do
-      @chef = PoolParty::Chef.get_chef(:solo, nil)
+      pool  = PoolParty::Pool.new("test")
+      cloud = PoolParty::Cloud.new("proj", pool)
+      @chef = PoolParty::ChefSolo.new(cloud)
     end
 
     should "support repo" do
       chef_repo = File.expand_path("..", __FILE__)
-      @chef.repo chef_repo
+      @chef.repo = chef_repo
       assert_equal chef_repo, @chef.repo
     end
 
     should "support recipe" do
-      @chef.recipe "apache2"
-      @chef.recipe "rsyslog::server"
+      @chef.add_recipe "apache2"
+      @chef.add_recipe "rsyslog::server"
       assert_equal ["apache2", "rsyslog::server"], @chef._recipes
     end
 
     should "support override attributes for recipes" do
-      @chef.recipe "apache2", :config => "foo"
-      expected_atts = { "apache2" => { :config => "foo" } }
+      @chef.add_recipe "apache2", :default, :config => "foo"
+      @chef.add_recipe "nginx::source", :default, :config => "bar"
+      expected_atts = {
+        "apache2" => { :config => "foo" },
+        "nginx" => { :config => "bar" }
+      }
 
-      assert_equal ["apache2"], @chef._recipes
+      assert_equal ["apache2", "nginx::source"], @chef._recipes
       assert_equal expected_atts, @chef.override_attributes
     end
 

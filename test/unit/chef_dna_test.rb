@@ -3,12 +3,16 @@ require "test_helper"
 class ChefDnaTest < Test::Unit::TestCase
 
   context "Chef DNA" do
-    should "create dna for chef client" do
-      client = PoolParty::ChefClient.new(:project) { server_url "http://localhost:4000" }
+    
 
-      client.roles "base", "app"
-      client.recipe "nginx::source"
-      client.recipe "varnish"
+    should "create dna for chef client" do
+      pool   = PoolParty::Pool.new("test")
+      cloud  = PoolParty::Cloud.new("test", pool)
+      client = PoolParty::ChefClient.new(cloud)
+
+      client.roles = ["base", "app"]
+      client.add_recipe "nginx::source"
+      client.add_recipe "varnish"
       client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
 
       dnafile = nil
@@ -49,11 +53,11 @@ class ChefDnaTest < Test::Unit::TestCase
     should "create dna and role for chef solo" do
       pool   = PoolParty::Pool.new("test")
       cloud  = PoolParty::Cloud.new("chefcloud", pool)
-      client = PoolParty::Chef.get_chef(:solo, cloud)
+      client = PoolParty::ChefSolo.new(cloud)
 
-      client.repo "/etc/chef/repo"
-      client.recipe "nginx::source"
-      client.recipe "varnish"
+      client.repo = "/etc/chef/repo"
+      client.add_recipe "nginx::source"
+      client.add_recipe "varnish"
       client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
 
       dnafile = nil

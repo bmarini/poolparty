@@ -3,36 +3,42 @@ require 'uri' # for URI.parse in write_bootstrap_files
 module PoolParty
   # Chef class bootstrapping chef-client.
   class ChefClient < Chef
-    dsl_methods :server_url, :validation_token, :validation_key, :validation_client_name
+    attr_accessor :server_url, :validation_token, :validation_key, :validation_client_name, :init_style
 
-    # When init_style.nil?, old behavior is used (just run the client).
-    # If init_style is specified, bootstrap::client cookbook is executed
-    # To this init style.
-    dsl_methods :init_style
+    def initialize(cloud)
+      @cloud = cloud
+      @roles = [ @cloud.name ]
+    end
 
-    def openid_url(url=nil)
-      if url.nil?
-        return @openid_url||= (u=URI.parse(server_url)
-        u.port=4001
-        openid_url u.to_s)
-      else
-        @openid_url=url 
+    def openid_url=(url)
+      @openid_url = url 
+    end
+
+    def openid_url
+      @openid_url ||= begin
+        u = URI.parse(server_url)
+        u.port = 4001
+        openid_url(u.to_s)
       end
     end
-    
-    def roles(*roles)
-      return @_roles||=[cloud.name] if roles.empty?
-      @_roles=roles
+
+    def roles=(roles)
+      @roles = Array(roles)
+    end
+
+    def roles
+      @roles
     end
 
     private
-    def after_initialized
-      raise PoolPartyError.create("ChefArgumentMissing", "server_url must be specified!") unless server_url
-    end
+
     def chef_bin
       "chef-client"
     end
 
+    # When init_style.nil?, old behavior is used (just run the client).
+    # If init_style is specified, bootstrap::client cookbook is executed
+    # To this init style.
     def chef_cmd
       # without init_style, let parent class start chef-client
       return super unless init_style

@@ -48,6 +48,10 @@ module PoolParty
       build_tmp_dir
     end
 
+    def tmp_path
+      cloud.tmp_path
+    end
+
     def node_run!(remote_instance)
       node_stop!(remote_instance)
       node_configure!(remote_instance)

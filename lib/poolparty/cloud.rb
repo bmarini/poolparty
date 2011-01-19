@@ -155,6 +155,7 @@ No autoscalers defined
           rsync upload[:source], upload[:dest]
         end
       end
+
       @chef.compile! unless @chef.nil?
     end
 

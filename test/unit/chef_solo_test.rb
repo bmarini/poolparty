@@ -10,6 +10,19 @@ class ChefSoloTest < Test::Unit::TestCase
   #   attributes :apache2 => {:listen_ports => ["80", "8080"]}
   # end
 
+  context "Chef Solo" do
+    setup { @chef = PoolParty::ChefSolo.new(nil) }
+
+    should "define binary" do
+      assert_equal "chef-solo", @chef.send(:chef_bin)
+    end
+
+    should "define command" do
+      assert_match /chef-solo -j \/etc\/chef\/dna\.json -c \/etc\/chef\/solo\.rb/, @chef.send(:chef_cmd)
+    end
+  
+  end
+
   context "Chef Solo DSL" do
     setup do
       pool  = PoolParty::Pool.new("test")

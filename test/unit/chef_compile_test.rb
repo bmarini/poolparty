@@ -1,9 +1,9 @@
 require "test_helper"
 
-class ChefDnaTest < Test::Unit::TestCase
+class ChefCompileTest < Test::Unit::TestCase
 
+  # TODO: Test tmp dir compilation instead
   context "Chef DNA" do
-    
 
     should "create dna for chef client" do
       pool   = PoolParty::Pool.new("test")
@@ -50,48 +50,36 @@ class ChefDnaTest < Test::Unit::TestCase
 
     end
 
-    should "create dna and role for chef solo" do
-      pool   = PoolParty::Pool.new("test")
-      cloud  = PoolParty::Cloud.new("chefcloud", pool)
-      client = PoolParty::ChefSolo.new(cloud)
+  end
 
-      client.repo = "/etc/chef/repo"
-      client.add_recipe "nginx::source"
-      client.add_recipe "varnish"
-      client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
+  context "Chef solo compilation" do
 
-      dnafile = nil
+    setup do
+      @pool   = PoolParty::Pool.new("test-pool")
+      @cloud  = PoolParty::Cloud.new("test-cloud", @pool)
+      @chef   = PoolParty::ChefSolo.new(@cloud)
+      @chef.repo = File.expand_path("../../fixtures/chef", __FILE__)
+      @chef.add_recipe "nginx::source"
+      @chef.add_recipe "varnish"
+      @chef.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
+      @chef.compile!
+    end
 
-      begin
-        dnafile = Tempfile.new("dna.json")
+    should "create all the right files" do
+      tmp_dir = "/tmp/poolparty/test-pool/test-cloud/etc/chef"
 
-        client.attributes.to_dna [], dnafile.path, { :run_list => ["role[cloudname]"] }
+      assert File.exist?(tmp_dir)
 
-        dnafile.rewind
-        result = dnafile.read
-        expected = <<-EOF.strip
+      expected = <<-EOF.strip
 {
   "run_list": [
-    "role[cloudname]"
+    "role[test-cloud]"
   ]
 }
-        EOF
-        assert_equal expected, result
-      ensure
-        dnafile.close
-        dnafile.unlink
-      end
+      EOF
+      assert_equal expected, File.read("#{tmp_dir}/dna.json")
 
-      rolefile = nil
-
-      begin
-        rolefile = Tempfile.new("cloudname.json")
-
-        client.send(:write_chef_role_json, rolefile.path)
-
-        rolefile.rewind
-        result = rolefile.read
-        expected = <<-EOF.strip
+      expected = <<-EOF.strip
 {
   "recipes": [
     "nginx::source",
@@ -108,8 +96,8 @@ class ChefDnaTest < Test::Unit::TestCase
   },
   "override_attributes": {
     "poolparty": {
-      "parent_name": "test",
-      "name": "chefcloud",
+      "parent_name": "test-pool",
+      "name": "test-cloud",
       "pool_info": {
         "clouds": {
 
@@ -119,14 +107,12 @@ class ChefDnaTest < Test::Unit::TestCase
   },
   "chef_type": "role",
   "description": "PoolParty cloud",
-  "name": "chefcloud"
+  "name": "test-cloud"
 }
         EOF
-        assert_equal JSON.parse(expected, :create_additions => false), JSON.parse(result, :create_additions => false)
-      ensure
-        rolefile.close
-        rolefile.unlink
-      end
+
+        assert_equal JSON.parse(expected, :create_additions => false),
+                     JSON.parse(File.read("#{tmp_dir}/roles/test-cloud.json"), :create_additions => false)
     end
   end
 end

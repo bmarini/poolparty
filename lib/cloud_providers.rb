@@ -1,19 +1,12 @@
-=begin rdoc
-  CloudProvider is the base class for cloud computing services such as Ec2, Eucalyptus - where your servers run.
-=end
+# CloudProvider is the base class for cloud computing services such as Ec2,
+# Eucalyptus - where your servers run.
 module CloudProviders
+  autoload :CloudProvider, "cloud_providers/cloud_provider"
+  autoload :Connections, "cloud_providers/connections"
+  autoload :RemoteInstance, "cloud_providers/remote_instance"
+  autoload :Ec2, "cloud_providers/ec2/ec2"
 
-  # List of all defined cloud_providers
   def self.all
     @all ||= []
   end
-
-end
-
-%w(connections remote_instance cloud_provider).each do |lib|
-  require File.dirname(__FILE__)+"/cloud_providers/#{lib}"
-end
-
-%w(ec2).each do |lib|
-  require "cloud_providers/#{lib}/#{lib}"
 end

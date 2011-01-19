@@ -22,6 +22,9 @@ class DslTest < Test::Unit::TestCase
 
       assert_equal 1, cloud.minimum_instances
       assert_equal 2, cloud.maximum_instances
+
+      expected = { :source => "~/chef-reop/cookbooks", :dest => "/etc/chef/cookbooks" }
+      assert_equal expected, cloud.instance_eval { @uploads }.first
     end
 
     should "evaluate a simple example with chef solo" do

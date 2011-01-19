@@ -9,14 +9,19 @@ class DslTest < Test::Unit::TestCase
             using :ec2
             keypair "/etc/chef/project_a.pem"
             instances 1..2
+            upload "~/chef-reop/cookbooks", "/etc/chef/cookbooks"
           end
         end
       EOF
 
       assert_equal 1, pools.size
       assert_equal "test", pools.first.name
-      assert_equal "/etc/chef/project_a.pem", pools.first.clouds.first.keypair.filepath
 
+      cloud = pools.first.clouds.first
+      assert_equal "/etc/chef/project_a.pem", cloud.keypair.filepath
+
+      assert_equal 1, cloud.minimum_instances
+      assert_equal 2, cloud.maximum_instances
     end
 
     should "evaluate a simple example with chef solo" do

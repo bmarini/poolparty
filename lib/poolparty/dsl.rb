@@ -13,17 +13,17 @@ module PoolParty
       Main.evaluate(spec)
     end
 
-    module Properties
-      def attribute(*names)
-        names.each do |name|
-          class_eval %Q{
-            def #{name}(val=nil)
-              @#{name} = val unless val.nil?
-              @#{name}
-            end
-          }
-        end
-      end
-    end
+    # module Properties
+    #   def attribute(*names)
+    #     names.each do |name|
+    #       class_eval %Q{
+    #         def #{name}(val=nil)
+    #           @#{name} = val unless val.nil?
+    #           @#{name}
+    #         end
+    #       }
+    #     end
+    #   end
+    # end
   end
 end

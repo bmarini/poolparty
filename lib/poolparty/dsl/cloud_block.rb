@@ -16,7 +16,18 @@ module PoolParty
       end
 
       def instances(arg)
-        @cloud.instances = arg
+        case arg
+        when Range
+          @cloud.minimum_instances = arg.first
+          @cloud.maximum_instances = arg.last
+        when Fixnum
+          @cloud.minimum_instances = arg
+          @cloud.maximum_instances = arg
+        when Hash
+          @cloud.nodes(arg)
+        else
+          raise ArgumentError, "You must call instances with either a number, a range or a hash (for a list of nodes)"
+        end
       end
 
       def upload(src, dst)

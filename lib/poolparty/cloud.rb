@@ -51,21 +51,6 @@ module PoolParty
       end
     end
 
-    def instances=(arg)
-      case arg
-      when Range
-        minimum_instances = arg.first
-        maximum_instances = arg.last
-      when Fixnum
-        minimum_instances = arg
-        maximum_instances = arg
-      when Hash
-        nodes(arg)
-      else
-        raise ArgumentError, "You must call instances with either a number, a range or a hash (for a list of nodes)"
-      end
-    end
-
     # Upload the source to dest ( using rsync )
     def add_upload(source, dest)
       @uploads ||= []

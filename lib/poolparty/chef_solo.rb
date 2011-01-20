@@ -8,6 +8,7 @@ module PoolParty
     end
 
     private
+
     def chef_bin
       "chef-solo"
     end
@@ -66,28 +67,56 @@ module PoolParty
       #   "run_list": [ "recipe[test]" ]
       # }
 
+      attr_accessor :config_filename, :attribute_filename
+
       def initialize(tmp_path, chef)
-        @tmp_path, @chef = tmp_path, chef
+        @tmp_path           = tmp_path
+        @chef               = chef
+        @config_filename    = "solo.rb"
+        @attribute_filename = "dna.json"
       end
 
       def build
         raise "#{@chef.repo} chef-repo directory does not exist" unless File.directory?(@chef.repo)
 
+        make_directories
+        copy_cookbooks
+        write_config_file
+        write_attribute_file
+        write_role_file
+      end
+
+      def make_directories
         # puts "Copying the chef-repo from #{@chef.repo} to #{tmp_chef_path}"
         FileUtils.rm_rf   tmp_chef_path
         FileUtils.mkdir_p tmp_chef_path
         FileUtils.mkdir_p tmp_roles_path
+      end
+
+      def copy_cookbooks
         FileUtils.mkdir_p tmp_cookbook_path
         FileUtils.cp_r    "#{@chef.repo}/.", tmp_cookbook_path
+      end
 
-        # puts "Creating dna.json"
-        write_dna_json("#{tmp_chef_path}/dna.json")
+      def write_attribute_file
+        path = File.join tmp_chef_path, @attribute_filename
+        ChefDnaFile.to_dna([], path, dna_hash)
+      end
 
-        # puts "Creating solo.rb"
-        write_solo_dot_rb("#{tmp_chef_path}/solo.rb")
+      def write_config_file
+        path = File.join tmp_chef_path, @config_filename
+        content = <<-EOE
+cookbook_path     ["/etc/chef/cookbooks/cookbooks", "/etc/chef/cookbooks/site-cookbooks"]
+role_path         "/etc/chef/roles"
+log_level         :info
+        EOE
 
-        # puts "Creating #{@chef.cloud.name}.json"
-        write_chef_role_json("#{tmp_roles_path}/#{role}.json")
+        File.open(path, "w") { |f| f << content }
+      end
+
+      def write_role_file
+        path = File.join tmp_roles_path, "#{role}.json"
+        ChefDnaFile.to_dna(role_recipes, path, role_hash)
       end
 
       def tmp_chef_path
@@ -112,24 +141,6 @@ module PoolParty
 
       def role_recipes
         @chef._recipes(cloud.pool.chef_step).map { |a| File.basename(a) }
-      end
-
-      def write_dna_json(path)
-        ChefDnaFile.to_dna([], path, dna_hash)
-      end
-
-      def write_solo_dot_rb(path)
-        content = <<-EOE
-cookbook_path     ["/etc/chef/cookbooks/cookbooks", "/etc/chef/cookbooks/site-cookbooks"]
-role_path         "/etc/chef/roles"
-log_level         :info
-        EOE
-
-        File.open(path, "w") { |f| f << content }
-      end
-
-      def write_chef_role_json(path)
-        ChefDnaFile.to_dna(role_recipes, path, role_hash)
       end
 
       def dna_hash

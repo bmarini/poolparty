@@ -2,30 +2,24 @@ require "test_helper"
 
 class ChefCompileTest < Test::Unit::TestCase
 
-  # TODO: Test tmp dir compilation instead
-  context "Chef DNA" do
-
-    should "create dna for chef client" do
+  context "Chef client compilation" do
+    setup do
       pool   = PoolParty::Pool.new("test")
       cloud  = PoolParty::Cloud.new("test", pool)
-      client = PoolParty::ChefClient.new(cloud)
+      @chef = PoolParty::ChefClient.new(cloud)
 
-      client.roles = ["base", "app"]
-      client.add_recipe "nginx::source"
-      client.add_recipe "varnish"
-      client.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
+      @chef.server_url= "http://localhost:4000"
+      @chef.roles = ["base", "app"]
+      @chef.add_recipe "nginx::source"
+      @chef.add_recipe "varnish"
+      @chef.attributes = { :nginx => { :listen_ports => ["80", "8080"] } }
+    end
 
-      dnafile = nil
+    should "create create the right files for default init style" do
+      @chef.compile!
+      tmp_dir = "/tmp/poolparty/test/test/etc/chef"
+      assert File.exist?(tmp_dir)
 
-      begin
-        dnafile = Tempfile.new("dna.json")
-
-        client.attributes.to_dna(
-          [], dnafile.path, { :run_list => client.roles.map { |r| "role[#{r}]"} + client._recipes.map { |r| "recipe[#{r}]" } }.merge(client.attributes)
-        )
-
-        dnafile.rewind
-        result = dnafile.read
         expected = <<-EOF.strip
 {
   "run_list": [
@@ -42,12 +36,52 @@ class ChefCompileTest < Test::Unit::TestCase
   }
 }
         EOF
-        assert_equal JSON.parse(expected, :create_additions => false), JSON.parse(result, :create_additions => false)
-      ensure
-        dnafile.close
-        dnafile.unlink
-      end
+        assert_equal JSON.parse(expected, :create_additions => false),
+                     JSON.parse(File.read("#{tmp_dir}/dna.json"), :create_additions => false)
 
+        expected = <<-EOF
+log_level          :info
+log_location       "/var/log/chef/client.log"
+ssl_verify_mode    :verify_none
+file_cache_path    "/var/cache/chef"
+pid_file           "/var/run/chef/client.pid"
+Chef::Log::Formatter.show_time = true
+openid_url         "http://localhost:4001"
+chef_server_url    "http://localhost:4000"
+        EOF
+
+        assert_equal expected, File.read("#{tmp_dir}/client.rb")
+    end
+
+    should "create the right files for bootstrap init style" do
+      @chef.init_style = "upstart"
+      @chef.compile!
+
+      assert File.exist?("/tmp/poolparty/test/test/tmp/chef")
+
+      expected = <<-EOF
+file_cache_path "/tmp/chef-solo"
+cookbook_path "/tmp/chef-solo/cookbooks"
+recipe_url "http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
+      EOF
+
+      assert_equal expected, File.read("/tmp/poolparty/test/test/tmp/chef/solo.rb")
+
+      expected = {
+        "bootstrap" => {
+          "chef" => {
+            "url_type" =>  "http",
+            "init_style" => "upstart",
+            "path" => "/srv/chef",
+            "serve_path" => "/srv/chef",
+            "server_fqdn" => "localhost",
+            "server_port" => 4000,
+          }
+        },
+        "run_list" => [ 'recipe[bootstrap::client]' ]
+      }
+
+      assert_equal expected, JSON.parse(File.read("/tmp/poolparty/test/test/tmp/chef/chef.json"))
     end
 
   end

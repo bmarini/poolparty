@@ -18,7 +18,7 @@ module PoolParty
       @openid_url ||= begin
         u = URI.parse(server_url)
         u.port = 4001
-        openid_url(u.to_s)
+        u.to_s
       end
     end
 
@@ -57,14 +57,14 @@ module PoolParty
       remote_instance.ssh cmds
     end
 
-    # The NEW actual chef resolver.
     def build_tmp_dir
       base_directory = tmp_path/"etc"/"chef"
       FileUtils.rm_rf base_directory
       FileUtils.mkdir_p base_directory   
       FileUtils.cp validation_key, base_directory if validation_key
-      puts "Creating the dna.json"
-      attributes.to_dna [], base_directory/"dna.json", {:run_list => roles.map{|r| "role[#{r}]"} + _recipes.map{|r| "recipe[#{r}]"}}.merge(attributes.init_opts)
+
+      attributes.to_dna [], base_directory/"dna.json", {:run_list => roles.map{|r| "role[#{r}]"} + _recipes.map{|r| "recipe[#{r}]"}}.merge(attributes)
+
       unless init_style then    # original style init
         write_client_dot_rb
       else
@@ -84,13 +84,13 @@ file_cache_path    "/var/cache/chef"
 pid_file           "/var/run/chef/client.pid"
 Chef::Log::Formatter.show_time = true
 openid_url         "#{openid_url}"
+chef_server_url    "#{server_url}"
       EOE
-      %w(chef_server_url).each{|url|
-        content+="#{url}   \"#{server_url}\"\n"
-      }
-      content+="validation_token  \"#{validation_token}\"\n" if validation_token
-      content+="validation_key    \"/etc/chef/#{File.basename validation_key}\"\n" if validation_key
-      content+="validation_client_name  \"#{validation_client_name}\"\n" if validation_client_name
+
+      content += "validation_token  \"#{validation_token}\"\n" if validation_token
+      content += "validation_key    \"/etc/chef/#{File.basename validation_key}\"\n" if validation_key
+      content += "validation_client_name  \"#{validation_client_name}\"\n" if validation_client_name
+
       File.open(to, "w") do |f|
         f << content
       end
@@ -122,10 +122,12 @@ recipe_url "http://s3.amazonaws.com/chef-solo/bootstrap-latest.tar.gz"
         },
         :run_list => [ 'recipe[bootstrap::client]' ],
       }
+
       if validation_client_name
         bootstrap_json[:bootstrap][:chef][:validation_client_name] = validation_client_name
       end
-      ChefAttribute.new(bootstrap_json).to_dna([], chef_json)
+
+      ChefDnaFile.to_dna([], chef_json, bootstrap_json)
     end
   end
 end

@@ -26,3 +26,4 @@ examples/thrift/erlang/ebin/*.beam
 \#*\#
 .bundle
 coverage
+!test/fixtures/tmp

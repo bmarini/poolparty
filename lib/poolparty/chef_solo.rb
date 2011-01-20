@@ -26,7 +26,7 @@ module PoolParty
       CMD
     end
 
-    def build_tmp_dir
+    def build_tmp_dir(tmp_path)
       TempDir.new(tmp_path, self).build
     end
 

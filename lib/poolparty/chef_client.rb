@@ -57,7 +57,7 @@ module PoolParty
       remote_instance.ssh cmds
     end
 
-    def build_tmp_dir
+    def build_tmp_dir(tmp_path)
       base_directory = tmp_path/"etc"/"chef"
       FileUtils.rm_rf base_directory
       FileUtils.mkdir_p base_directory   
@@ -66,7 +66,7 @@ module PoolParty
       attributes.to_dna [], base_directory/"dna.json", {:run_list => roles.map{|r| "role[#{r}]"} + _recipes.map{|r| "recipe[#{r}]"}}.merge(attributes)
 
       unless init_style then    # original style init
-        write_client_dot_rb
+        write_client_dot_rb(tmp_path/"etc"/"chef"/"client.rb")
       else
         bootstrap_tmp_dir = tmp_path/"tmp/chef"
         FileUtils.rm_rf bootstrap_tmp_dir
@@ -75,7 +75,7 @@ module PoolParty
       end
     end
     
-    def write_client_dot_rb(to=tmp_path/"etc"/"chef"/"client.rb")
+    def write_client_dot_rb(to)
       content = <<-EOE
 log_level          :info
 log_location       "/var/log/chef/client.log"

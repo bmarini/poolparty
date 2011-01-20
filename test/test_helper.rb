@@ -17,3 +17,10 @@ modify_env_with_hash(
 require "poolparty"
 require "git-style-binary/command"
 GitStyleBinary.run = true
+
+# Helper methods
+class Test::Unit::TestCase
+  def assert_equal_files(file1, file2)
+    assert_equal( File.read(file1), File.read(file2) )
+  end
+end

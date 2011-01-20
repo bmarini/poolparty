@@ -58,7 +58,7 @@ module PoolParty
     end
 
     def tmp_path
-      "/tmp/poolparty/#{pool.name}/#{name}"
+      @tmp_path ||= "/tmp/poolparty/#{pool.name}/#{name}"
     end
 
     # compile the cloud spec and execute the compiled system and remote calls

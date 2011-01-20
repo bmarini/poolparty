@@ -1,0 +1,29 @@
+{
+  "chef_type": "role",
+  "default_attributes": {
+    "nginx": {
+      "listen_ports": [
+        "80",
+        "8080"
+      ]
+    }
+  },
+  "recipes": [
+    "nginx::source",
+    "varnish"
+  ],
+  "override_attributes": {
+    "poolparty": {
+      "parent_name": "test-pool",
+      "pool_info": {
+        "clouds": {
+
+        }
+      },
+      "name": "test-cloud"
+    }
+  },
+  "description": "PoolParty cloud",
+  "name": "test-cloud",
+  "json_class": "Chef::Role"
+}

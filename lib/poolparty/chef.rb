@@ -44,12 +44,8 @@ module PoolParty
       end
     end
 
-    def compile!
-      build_tmp_dir
-    end
-
-    def tmp_path
-      cloud.tmp_path
+    def compile!(tmp_path)
+      build_tmp_dir(tmp_path)
     end
 
     def node_run!(remote_instance)

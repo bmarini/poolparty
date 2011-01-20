@@ -14,19 +14,19 @@ module PoolParty
     BOOTSTRAP_DIRS = %w( /var/log/chef /var/cache/chef /var/run/chef )
 
     def attributes
-      @attributes ||= ChefAttribute.new
+      @attributes ||= {}
     end
     
     def override_attributes
-      @override_attributes ||= ChefAttribute.new
+      @override_attributes ||= {}
     end
 
     def attributes=(atts)
-      @attributes = ChefAttribute[atts]
+      @attributes = atts
     end
     
     def override_attributes=(atts)
-      @override_attributes = ChefAttribute[atts]
+      @override_attributes = atts
     end
 
     def add_recipe(recipe_name, action=:default, recipe_atts={})

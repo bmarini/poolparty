@@ -3,8 +3,8 @@ require "test_helper"
 class ChefTest < Test::Unit::TestCase
   context "Chef" do
     should "have attributes" do
-      assert_instance_of PoolParty::ChefAttribute, PoolParty::ChefSolo.new(nil).attributes
-      assert_instance_of PoolParty::ChefAttribute, PoolParty::ChefSolo.new(nil).override_attributes
+      assert_instance_of Hash, PoolParty::ChefSolo.new(nil).attributes
+      assert_instance_of Hash, PoolParty::ChefSolo.new(nil).override_attributes
     end
   end
 

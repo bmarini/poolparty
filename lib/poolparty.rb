@@ -16,7 +16,6 @@ end
 module PoolParty
   autoload :Base, "poolparty/base"
   autoload :Chef, "poolparty/chef"
-  autoload :ChefAttribute, "poolparty/chef_attribute"
   autoload :ChefClient, "poolparty/chef_client"
   autoload :ChefDnaFile, "poolparty/chef_dna_file"
   autoload :ChefSolo, "poolparty/chef_solo"

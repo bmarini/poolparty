@@ -63,7 +63,7 @@ module PoolParty
       FileUtils.mkdir_p base_directory   
       FileUtils.cp validation_key, base_directory if validation_key
 
-      attributes.to_dna [], base_directory/"dna.json", {:run_list => roles.map{|r| "role[#{r}]"} + _recipes.map{|r| "recipe[#{r}]"}}.merge(attributes)
+      ChefDnaFile.to_dna( [], "#{base_directory}/dna.json",  {:run_list => roles.map{|r| "role[#{r}]"} + _recipes.map{|r| "recipe[#{r}]"}}.merge(attributes) )
 
       unless init_style then    # original style init
         write_client_dot_rb(tmp_path/"etc"/"chef"/"client.rb")

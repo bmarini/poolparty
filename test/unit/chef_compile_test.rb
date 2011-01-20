@@ -5,6 +5,7 @@ class ChefCompileTest < Test::Unit::TestCase
     setup do
       @scratch_dir = File.expand_path("../../scratch/tmp/poolparty", __FILE__)
       @fixture_dir = File.expand_path("../../scratch/tmp/poolparty", __FILE__)
+      FileUtils.rm_rf File.expand_path("../../scratch/tmp", __FILE__)
     end
 
     context "client compilation" do

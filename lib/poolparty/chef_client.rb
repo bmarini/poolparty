@@ -108,9 +108,9 @@ openid_url         "#{@chef.openid_url}"
 chef_server_url    "#{@chef.server_url}"
         EOE
 
-        content += "validation_token  \"#{@chef.validation_token}\"\n" if @chef.validation_token
-        content += "validation_key    \"/etc/chef/#{File.basename @chef.validation_key}\"\n" if @chef.validation_key
-        content += "validation_client_name  \"#{@chef.validation_client_name}\"\n" if @chef.validation_client_name
+        content += %Q{validation_token  "#{@chef.validation_token}"\n} if @chef.validation_token
+        content += %Q{validation_key    "/etc/chef/#{File.basename @chef.validation_key}"\n} if @chef.validation_key
+        content += %Q{validation_client_name  "#{@chef.validation_client_name}"\n} if @chef.validation_client_name
 
         File.open("#{base_dir}/client.rb", "w") do |f|
           f << content

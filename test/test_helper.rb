@@ -21,6 +21,13 @@ GitStyleBinary.run = true
 # Helper methods
 class Test::Unit::TestCase
   def assert_equal_files(file1, file2)
-    assert_equal( File.read(file1), File.read(file2) )
+    if File.extname(file1) == ".json"
+      assert_equal(
+        JSON.parse(File.read(file1), :create_additions => false),
+        JSON.parse(File.read(file2), :create_additions => false)
+      )
+    else
+      assert_equal( File.read(file1), File.read(file2), "Expected #{file1} to be equal to #{file2}: %s" )
+    end
   end
 end

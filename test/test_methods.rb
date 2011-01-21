@@ -7,10 +7,6 @@ def test_dir
   "#{File.dirname(__FILE__)}/test_dir"
 end
 
-def clear!
-  $pools = $clouds = nil
-end
-
 def modify_env_with_hash(h={})
   orig_env = Kernel.const_get(:ENV)
   

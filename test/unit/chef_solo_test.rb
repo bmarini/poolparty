@@ -39,7 +39,7 @@ class ChefSoloTest < Test::Unit::TestCase
     should "support recipe" do
       @chef.add_recipe "apache2"
       @chef.add_recipe "rsyslog::server"
-      assert_equal ["apache2", "rsyslog::server"], @chef._recipes
+      assert_equal ["apache2", "rsyslog::server"], @chef.recipes
     end
 
     should "support override attributes for recipes" do
@@ -50,7 +50,7 @@ class ChefSoloTest < Test::Unit::TestCase
         "nginx" => { :config => "bar" }
       }
 
-      assert_equal ["apache2", "nginx::source"], @chef._recipes
+      assert_equal ["apache2", "nginx::source"], @chef.recipes
       assert_equal expected_atts, @chef.override_attributes
     end
 

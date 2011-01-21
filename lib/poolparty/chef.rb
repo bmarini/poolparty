@@ -30,17 +30,11 @@ module PoolParty
     end
 
     def add_recipe(recipe_name, action=:default, recipe_atts={})
-      _recipes(action) << recipe_name unless _recipes(action).include?(recipe_name)
+      recipes(action) << recipe_name unless recipes(action).include?(recipe_name)
 
       unless recipe_atts.empty?
         key = recipe_name.split("::").first
         override_attributes.merge!(key => recipe_atts)
-      end
-    end
-
-    def recipes(*recipes)
-      recipes.each do |r|
-        add_recipe(r)
       end
     end
 
@@ -112,13 +106,18 @@ module PoolParty
       remote_instance.ssh(bootstrap_cmds)
       end
 
-    def _recipes(action=nil)
+    def recipes(action=nil)
       @recipes ||= Hash.new { |h,k| h[k] = [] }
 
       action = action.to_sym unless action.nil?
       key = action || current_action
 
       @recipes[key]
+    end
+
+    def _recipes(action=nil)
+      warn "_recipes id deprecated"
+      recipes(action)
     end
 
     private

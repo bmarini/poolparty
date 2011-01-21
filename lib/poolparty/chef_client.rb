@@ -31,7 +31,7 @@ module PoolParty
     end
 
     def run_list
-      list = roles.map { |r| "role[#{r}]" } +  _recipes.map { |r| "recipe[#{r}]" }
+      list = roles.map { |r| "role[#{r}]" } +  recipes.map { |r| "recipe[#{r}]" }
       return { :run_list => list }
     end
 

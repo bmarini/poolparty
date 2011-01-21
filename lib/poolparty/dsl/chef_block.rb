@@ -61,7 +61,7 @@ module PoolParty
         end
 
         @action.push(action)
-        @chef._recipes(depends).each { |r| recipe(r) } if depends
+        @chef.recipes(depends).each { |r| recipe(r) } if depends
 
         begin
           yield if block_given?

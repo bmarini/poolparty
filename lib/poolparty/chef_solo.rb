@@ -40,7 +40,7 @@ module PoolParty
       # Minimal stuff to run chef-solo
       # ------------------------------
       #
-      # Cookbooks will need to by uploaded to the `cookbook_path`
+      # Cookbooks will need to be uploaded to the `cookbook_path`
       #
       # Command to run:
       # $ chef-solo -c etc/chef/solo.rb -j etc/chef/node.json
@@ -140,7 +140,7 @@ log_level         :info
       end
 
       def role_recipes
-        @chef._recipes(cloud.pool.chef_step).map { |a| File.basename(a) }
+        @chef.recipes(cloud.pool.chef_step).map { |a| File.basename(a) }
       end
 
       def dna_hash

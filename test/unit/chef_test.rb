@@ -9,15 +9,20 @@ class ChefTest < Test::Unit::TestCase
   end
 
   context "Chef DSL" do
-    setup do
-      pool  = PoolParty::Pool.new("test")
-      cloud = PoolParty::Cloud.new("test", pool)
-      @chef = PoolParty::ChefSolo.new(cloud)
-    end
-
     should "support recipes" do
-      @chef.recipes "apache2", "varnish"
-      assert_equal ["apache2", "varnish"], @chef._recipes
+      pools = PoolParty::Dsl.evaluate <<-EOF
+        pool do
+          cloud "proj" do
+            using :ec2
+            chef :solo do
+              recipes "apache2", "varnish"
+            end
+          end
+        end
+      EOF
+
+      chef = pools.first.clouds.first.chef
+      assert_equal ["apache2", "varnish"], chef.recipes
     end
 
     # on_step :download_install do
@@ -49,10 +54,10 @@ class ChefTest < Test::Unit::TestCase
       EOF
 
       chef = pools.first.clouds.first.chef
-      assert_equal [], chef._recipes
-      assert_equal ["myrecipes::download", "myrecipes::install"], chef._recipes(:download_install)
+      assert_equal [], chef.recipes
+      assert_equal ["myrecipes::download", "myrecipes::install"], chef.recipes(:download_install)
 
-      assert_equal ["myrecipes::download", "myrecipes::install", "myrecipes::run"], chef._recipes(:run)
+      assert_equal ["myrecipes::download", "myrecipes::install", "myrecipes::run"], chef.recipes(:run)
     end
   end
 end

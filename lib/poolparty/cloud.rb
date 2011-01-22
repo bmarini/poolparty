@@ -76,7 +76,7 @@ module PoolParty
     # Shutdown and delete the load_balancers, auto_scaling_groups, launch_configurations,
     # security_groups, triggers and instances defined by this cloud
     def teardown
-      raise "Only Ec2 teardown supported" unless provider.name.to_s == 'ec2'
+      raise NotImplementedError, "Only Ec2 teardown supported" unless provider.name.to_s == 'ec2'
       puts "! Tearing down cloud #{name}"
       # load_balancers.each do |name, lb|
       #   puts "! Deleting load_balaner #{lb_name}"
@@ -201,10 +201,10 @@ No autoscalers defined
     end
 
     # Explicit proxies to cloud_provider methods
-    def run_instance(o={}); cloud_provider.run_instance(o);end
-    def terminate_instance!(o={}); cloud_provider.terminate_instance!(o);end
-    def describe_instances(o={}); cloud_provider.describe_instances(o);end
-    def describe_instance(o={}); cloud_provider.describe_instance(o);end
+    def run_instance(o={}); provider.run_instance(o);end
+    def terminate_instance!(o={}); provider.terminate_instance!(o);end
+    def describe_instances(o={}); provider.describe_instances(o);end
+    def describe_instance(o={}); provider.describe_instance(o);end
 
     def proper_name
       "#{parent.name}-#{name}"

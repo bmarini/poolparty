@@ -25,6 +25,10 @@ module PoolParty
   autoload :PoolPartyError, "poolparty/pool_party_error"
   autoload :VERSION, "poolparty/version"
 
+  module Providers
+    autoload :Abstract, "poolparty/providers/abstract"
+  end
+
   def self.version
     VERSION
   end
